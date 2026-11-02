@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F.A.B CO LTD · Aluminum Accessories and Profiles</title>
+<meta name="description" content="Order aluminum profiles, sheets, tubes and hardware online from F.A.B CO LTD. Delivery or pickup, with wholesale prices for approved business customers.">
+<link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+<script src="js/common.js"></script>
+<script src="js/store.js"></script>
+<script defer src="js/alpine.min.js"></script>
+</head>
+<body>
+<div class="app" x-data="store()" x-cloak @keydown.escape.window="menuOpen = false">
+
+<!-- ================= Header ================= -->
+<header class="site-header">
+  <div class="container header-row">
+    <button type="button" class="brand" @click="goHome()">
+      <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="8" fill="#1554C4"/><path d="M10 26 L18 10 L26 26" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="round"/><path d="M13.5 20 H22.5" stroke="#FFFFFF" stroke-width="3"/></svg>
+      <span class="brand-text"><span class="brand-name">F.A.B CO LTD</span><span class="brand-tag">Aluminum Accessories and Profiles</span></span>
+    </button>
+
+    <button type="button" class="btn btn-soft" @click="menuOpen = !menuOpen" :aria-expanded="menuOpen" aria-controls="site-menu">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      Menu
+    </button>
+
+    <form class="search" role="search" @submit.prevent="doSearch()">
+      <input type="search" aria-label="Search products" x-model="query" placeholder="Search profiles, sheets, tubes, hardware…">
+      <button type="submit" aria-label="Search">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      </button>
+    </form>
+
+    <button type="button" class="btn btn-quiet" x-show="!signedIn" @click="goSignin('login')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+      Sign in
+    </button>
+    <button type="button" class="btn btn-quiet" x-show="signedIn" @click="go('orders')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+      My account <span class="pill-dark pill-xs">WHOLESALE</span>
+    </button>
+
+    <button type="button" class="btn btn-primary" @click="go('cart')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 4h2l2.4 11h11l2-8H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg>
+      Cart <span class="count-pill" x-text="cartCount"></span>
+    </button>
+  </div>
+
+  <nav class="cat-bar" aria-label="Product categories">
+    <div class="container cat-bar-inner">
+      <template x-for="c in cats" :key="c.id">
+        <button type="button" @click="openCategory(c.id)" :aria-current="screen === 'category' && catId === c.id ? 'page' : null" x-text="c.name"></button>
+      </template>
+    </div>
+  </nav>
+
+  <div class="notice-bar">
+    <div class="container">
+      <div class="notice-row" x-show="!signedIn">
+        <strong>Wholesale customer?</strong>
+        <span>Sign in with your approved account and every price drops to your wholesale price.</span>
+        <button type="button" class="link-btn" @click="goSignin('login')">Sign in</button>
+        <span aria-hidden="true">·</span>
+        <button type="button" class="link-btn" @click="goSignin('apply')">Apply for an account</button>
+      </div>
+      <div class="notice-row" x-show="signedIn">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>
+        <strong>Wholesale prices active.</strong>
+        <span>You're signed in, so every price you see is your discounted price.</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= Menu ================= -->
+<div id="site-menu" class="menu-panel" x-show="menuOpen" x-transition.opacity>
+  <div class="container menu-grid">
+    <div class="stack">
+      <h2 class="menu-title">Categories</h2>
+      <template x-for="c in cats" :key="c.id">
+        <button type="button" class="menu-link" @click="openCategory(c.id)"><span x-text="c.name"></span> <span class="menu-meta" x-text="'· ' + countIn(c.id)"></span></button>
+      </template>
+    </div>
+    <div class="stack">
+      <h2 class="menu-title">Your account</h2>
+      <button type="button" class="menu-link" @click="go('orders')">My orders</button>
+      <button type="button" class="menu-link" @click="go('cart')">Cart (<span x-text="cartCount"></span>)</button>
+      <button type="button" class="menu-link" x-show="!signedIn" @click="goSignin('login')">Sign in</button>
+      <button type="button" class="menu-link" x-show="!signedIn" @click="goSignin('apply')">Apply for a wholesale account</button>
+      <button type="button" class="menu-link danger" x-show="signedIn" @click="signOut()">Sign out</button>
+    </div>
+    <div class="stack gap-8">
+      <h2 class="menu-title">Help</h2>
+      <span class="menu-text">Delivery or pickup from the shop</span>
+      <span class="menu-text">Call [PHONE]</span>
+      <span class="menu-text">Open [OPENING HOURS]</span>
+      <span class="menu-text">[SHOP ADDRESS]</span>
+    </div>
+  </div>
+  <div class="container menu-close">
+    <button type="button" class="btn btn-quiet btn-sm" @click="menuOpen = false">
+      <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      Close menu
+    </button>
+  </div>
+</div>
+
+<!-- ================= Hero (home only) ================= -->
+<section class="hero" aria-label="Welcome" x-show="screen === 'home'">
+  <div class="container hero-inner">
+    <div class="hero-text">
+      <span class="eyebrow">Welcome to F.A.B CO LTD</span>
+      <h1>Aluminum profiles, sheets and hardware, ready to order</h1>
+      <p>Choose your products online, then pick delivery or pickup. Wholesale customers get a discounted price on every item.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary btn-lg" href="#products">Shop products</a>
+        <button type="button" class="btn btn-outline btn-lg" @click="goSignin('apply')">Open a wholesale account</button>
+      </div>
+    </div>
+    <div class="photo hero-photo">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg>
+      <strong>Welcome photo</strong>
+      <span>Your shop, warehouse or a finished project</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= Toast ================= -->
+<div class="container toast" role="status" x-show="toast" x-transition.opacity>
+  <div class="toast-inner">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#157F3D" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>
+    <span x-text="toast"></span>
+    <button type="button" class="btn btn-primary btn-sm" @click="go('cart')">View cart</button>
+  </div>
+</div>
+
+<main class="container page">
+
+  <!-- ===== Home ===== -->
+  <div x-show="screen === 'home'">
+    <h2 class="h2">Shop by category</h2>
+    <div class="cat-grid">
+      <template x-for="c in cats" :key="c.id">
+        <button type="button" class="card cat-tile" @click="openCategory(c.id)">
+          <span class="photo">
+            <template x-if="c.img"><img :src="c.img" alt=""></template>
+            <span x-show="!c.img">Category photo</span>
+          </span>
+          <span class="cat-tile-body">
+            <span class="cat-tile-name" x-text="c.name"></span>
+            <span class="cat-tile-count" x-text="countIn(c.id) + ' →'"></span>
+          </span>
+        </button>
+      </template>
+    </div>
+    <div class="section-head" id="products">
+      <h2 class="h2">Our products</h2>
+      <div class="filters" role="group" aria-label="Filter products">
+        <template x-for="f in filters" :key="f.id">
+          <button type="button" class="chip" :aria-pressed="filter === f.id" @click="filter = f.id" x-text="f.label"></button>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Category ===== -->
+  <div x-show="screen === 'category'">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <button type="button" @click="goHome()">Home</button><span aria-hidden="true">/</span><span x-text="cat.name"></span>
+    </nav>
+    <h1 class="h1" x-text="cat.name"></h1>
+    <p class="page-intro" x-text="cat.blurb"></p>
+  </div>
+
+  <!-- ===== Search ===== -->
+  <div x-show="screen === 'search'">
+    <h1 class="h1">Search results</h1>
+    <p class="page-intro" x-text="searchSummary"></p>
+  </div>
+
+  <!-- ===== Product grid (home, category, search) ===== -->
+  <div class="product-grid" x-show="isGridScreen && gridProducts.length > 0">
+    <template x-for="p in gridProducts" :key="p.id">
+      <article class="card product-card">
+        <button type="button" class="photo" :aria-label="'View ' + p.name" @click="openProduct(p.id)">
+          <template x-if="p.img"><img :src="p.img" alt=""></template>
+          <template x-if="!p.img">
+            <span class="stack gap-4" style="align-items:center">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg>
+              Product photo
+            </span>
+          </template>
+          <span class="tags">
+            <template x-for="t in p.tags" :key="t">
+              <span class="tag" :class="'tag-' + t">
+                <svg x-show="t === 'top'" class="icon-xs" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>
+                <span x-text="tagLabel(t)"></span>
+              </span>
+            </template>
+          </span>
+        </button>
+        <div class="product-body">
+          <span class="product-cat" x-text="catOf(p.cat).name"></span>
+          <button type="button" class="product-name" @click="openProduct(p.id)" x-text="p.name"></button>
+          <span class="product-weight" x-text="p.weight"></span>
+          <div class="price-row">
+            <span class="price" x-text="cardPrice(p)"></span>
+            <span class="strike" x-show="signedIn" x-text="cardRetail(p)"></span>
+          </div>
+          <button type="button" class="btn btn-primary" x-show="!hasVariants(p)" @click="addToCart(p.id, 0, 1)">Add to cart</button>
+          <button type="button" class="btn btn-outline" x-show="hasVariants(p)" @click="openProduct(p.id)">Choose options</button>
+        </div>
+      </article>
+    </template>
+  </div>
+
+  <div class="empty" x-show="isGridScreen && gridProducts.length === 0">
+    <strong>No products match your search</strong>
+    <span>Try a shorter word, like "tube" or "sheet", or browse the categories.</span>
+    <button type="button" class="btn btn-primary" @click="goHome()">Browse all products</button>
+  </div>
+
+  <!-- ===== Product page ===== -->
+  <div x-show="screen === 'product'">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <button type="button" @click="goHome()">Home</button><span aria-hidden="true">/</span>
+      <button type="button" @click="openCategory(prod.cat)" x-text="catOf(prod.cat).name"></button><span aria-hidden="true">/</span>
+      <span x-text="prod.name"></span>
+    </nav>
+    <div class="product-layout">
+      <div class="gallery">
+        <div class="photo gallery-main">
+          <template x-if="showMainImage"><img :src="prod.img" :alt="prod.name"></template>
+          <svg x-show="!showMainImage" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg>
+          <strong x-show="!showMainImage" x-text="'Photo ' + (photo + 1) + ' of 4'"></strong>
+        </div>
+        <div class="thumbs">
+          <template x-for="i in [0, 1, 2, 3]" :key="i">
+            <button type="button" class="photo thumb" :aria-pressed="photo === i" :aria-label="'Show photo ' + (i + 1)" @click="photo = i">
+              <template x-if="i === 0 && prod.img"><img :src="prod.img" alt=""></template>
+              <span x-show="!(i === 0 && prod.img)" x-text="i + 1"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <div class="product-info">
+        <div class="row gap-8">
+          <template x-for="t in prod.tags" :key="t">
+            <span class="tag" :class="'tag-' + t">
+              <svg x-show="t === 'top'" class="icon-xs" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>
+              <span x-text="tagLabel(t)"></span>
+            </span>
+          </template>
+          <span class="pill-soft" x-text="catOf(prod.cat).name"></span>
+        </div>
+        <div class="stack gap-4">
+          <h1 class="h1" x-text="prod.name"></h1>
+          <span class="muted small" x-text="'SKU ' + prod.sku"></span>
+        </div>
+
+        <div class="price-box">
+          <div class="row gap-12" style="align-items: baseline">
+            <span class="price price-lg" x-text="money(unitPrice(pv))"></span>
+            <span class="muted" x-text="prod.unit"></span>
+            <span class="strike" x-show="signedIn" x-text="'Retail ' + money(pv.retail)"></span>
+            <span class="pill-dark" x-show="signedIn">Your wholesale price</span>
+          </div>
+          <span class="small" x-show="!signedIn" style="color: var(--text-2)">Wholesale customer? <button type="button" class="link-btn" @click="goSignin('login')">Sign in</button> to see your discounted price.</span>
+        </div>
+
+        <div class="stack gap-8" x-show="hasVariants(prod)" role="group" :aria-label="prod.vlabel">
+          <span><strong x-text="prod.vlabel + ':'"></strong> <span style="color: var(--text-2)" x-text="pv.name"></span></span>
+          <div class="row gap-8">
+            <template x-for="(v, i) in prod.variants" :key="v.name">
+              <button type="button" class="variant" :aria-pressed="variantIndex === i" @click="variant = i" x-text="v.name"></button>
+            </template>
+          </div>
+        </div>
+
+        <div class="buy-row">
+          <div class="stepper">
+            <button type="button" aria-label="Decrease quantity" @click="qty = Math.max(1, qty - 1)">−</button>
+            <output aria-live="polite" x-text="qty"></output>
+            <button type="button" aria-label="Increase quantity" @click="qty++">+</button>
+          </div>
+          <button type="button" class="btn btn-primary btn-lg" @click="addToCart(prod.id, variantIndex, qty)">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 4h2l2.4 11h11l2-8H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg>
+            Add to cart
+          </button>
+        </div>
+
+        <div class="stack gap-8">
+          <h2 class="h3" style="font-size: 18px">Product information</h2>
+          <dl class="specs">
+            <div class="spec"><dt>Weight</dt><dd x-text="prod.weight"></dd></div>
+            <template x-for="sp in prod.specs" :key="sp[0]">
+              <div class="spec"><dt x-text="sp[0]"></dt><dd x-text="sp[1]"></dd></div>
+            </template>
+          </dl>
+          <p style="color: var(--ink-2); margin-top: 6px" x-text="prod.desc"></p>
+        </div>
+
+        <div class="note-row">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#1554C4" stroke-width="2" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg>
+          Delivery or pickup from the shop, you choose at checkout.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Cart ===== -->
+  <div x-show="screen === 'cart'">
+    <h1 class="h1" style="margin-bottom: 24px">Your cart</h1>
+    <div class="empty" x-show="cart.length === 0">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3D5A88" stroke-width="1.5" aria-hidden="true"><path d="M3 4h2l2.4 11h11l2-8H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg>
+      <strong>Your cart is empty</strong>
+      <span>Browse the products and add what you need.</span>
+      <button type="button" class="btn btn-primary" @click="goHome()">Browse products</button>
+    </div>
+    <div class="two-col" x-show="cart.length > 0">
+      <div class="main-col card">
+        <template x-for="(l, i) in cartLines" :key="l.key">
+          <div class="cart-line">
+            <div class="photo cart-thumb">
+              <template x-if="l.img"><img :src="l.img" alt=""></template>
+              <svg x-show="!l.img" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg>
+            </div>
+            <div class="cart-info">
+              <button type="button" class="cart-name" @click="openProduct(l.pid, l.vi)" x-text="l.name"></button>
+              <span class="small" style="color: var(--text-2)" x-show="l.variantText" x-text="l.variantText"></span>
+              <span class="small muted" x-text="l.unit + ' each'"></span>
+            </div>
+            <div class="stepper stepper-sm">
+              <button type="button" aria-label="Decrease quantity" @click="setQty(i, l.qty - 1)">−</button>
+              <output x-text="l.qty"></output>
+              <button type="button" aria-label="Increase quantity" @click="setQty(i, l.qty + 1)">+</button>
+            </div>
+            <span class="line-total" x-text="l.total"></span>
+            <button type="button" class="remove-btn" @click="setQty(i, 0)">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+              Remove
+            </button>
+          </div>
+        </template>
+      </div>
+      <aside class="side-col summary">
+        <h2 class="h3">Order summary</h2>
+        <div class="sum-row"><span class="label">Items</span><span x-text="cartCount"></span></div>
+        <div class="sum-row"><span class="label">Regular price</span><span x-text="money(retailTotal)"></span></div>
+        <div class="sum-row saving" x-show="signedIn"><span>Wholesale discount</span><span x-text="'−' + money(savings)"></span></div>
+        <div class="sum-row"><span class="label">Delivery</span><span>Chosen at checkout</span></div>
+        <div class="sum-row sum-total"><span>Total</span><strong x-text="money(total)"></strong></div>
+        <div class="hint-box" x-show="!signedIn">Wholesale customer? <button type="button" class="link-btn" @click="goSignin('login')">Sign in</button> to get your discounted prices.</div>
+        <button type="button" class="btn btn-primary btn-lg" @click="go('checkout')">Go to checkout</button>
+        <button type="button" class="link-btn" style="min-height: 40px" @click="goHome()">Continue shopping</button>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ===== Sign in / apply ===== -->
+  <div x-show="screen === 'signin'">
+    <div class="card auth">
+      <div class="auth-tabs" role="tablist" aria-label="Account">
+        <button type="button" role="tab" :aria-selected="authTab === 'login'" @click="authTab = 'login'">Sign in</button>
+        <button type="button" role="tab" :aria-selected="authTab === 'apply'" @click="authTab = 'apply'">Apply for wholesale</button>
+      </div>
+
+      <form class="auth-body" role="tabpanel" x-show="authTab === 'login'" @submit.prevent="signIn()">
+        <div class="stack gap-4">
+          <h1 class="h1" style="font-size: 28px">Welcome back</h1>
+          <span class="muted">Sign in to your wholesale account to see your discounted prices.</span>
+        </div>
+        <label class="field">Email<input type="email" autocomplete="email" required></label>
+        <label class="field">Password<input type="password" autocomplete="current-password" required></label>
+        <button type="button" class="link-btn" style="align-self: flex-start; font-weight: 500; font-size: 14px">Forgot password?</button>
+        <button type="submit" class="btn btn-primary btn-lg">Sign in</button>
+        <p class="demo-note">Demo: any email and password signs you in as an approved wholesale customer.</p>
+      </form>
+
+      <form class="auth-body" role="tabpanel" x-show="authTab === 'apply'" @submit.prevent="submitApplication()">
+        <div class="stack gap-4">
+          <h1 class="h1" style="font-size: 28px">Apply for a wholesale account</h1>
+          <span class="muted">Tell us about your business. Once we approve your account, you'll see wholesale prices whenever you sign in.</span>
+        </div>
+        <label class="field">Business name<input type="text" autocomplete="organization" required></label>
+        <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr))">
+          <label class="field">Contact person<input type="text" autocomplete="name" required></label>
+          <label class="field">Phone<input type="tel" autocomplete="tel" required></label>
+          <label class="field">City<input type="text" autocomplete="address-level2"></label>
+          <label class="field">Business type
+            <select>
+              <option>Aluminum workshop</option>
+              <option>Building contractor</option>
+              <option>Glass and frames shop</option>
+              <option>Other</option>
+            </select>
+          </label>
+        </div>
+        <label class="field">Email<input type="email" autocomplete="email" required></label>
+        <label class="field">Password<input type="password" autocomplete="new-password" required minlength="8"></label>
+        <button type="submit" class="btn btn-primary btn-lg">Submit application</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== Application received ===== -->
+  <div x-show="screen === 'applied'">
+    <div class="card message-card">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1554C4" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 7v5l3 2"/></svg>
+      <h1 class="h1" style="font-size: 28px">Application received</h1>
+      <p>Our team will review your business details and email you once your account is approved. Until then, you can still order at regular prices.</p>
+      <span class="status status-amber">Status: waiting for approval</span>
+      <button type="button" class="btn btn-primary" style="margin-top: 8px" @click="goHome()">Continue shopping</button>
+    </div>
+  </div>
+
+  <!-- ===== Checkout ===== -->
+  <div x-show="screen === 'checkout'">
+    <h1 class="h1" style="margin-bottom: 8px">Checkout</h1>
+    <p class="page-intro" x-show="!signedIn">You're checking out as a guest at regular prices. Wholesale customer? <button type="button" class="link-btn" @click="goSignin('login')">Sign in first</button>.</p>
+    <p class="page-intro saving" x-show="signedIn">Signed in: your wholesale prices are applied to this order.</p>
+    <div class="two-col">
+      <form id="checkout-form" class="main-col card checkout-form" @submit.prevent="placeOrder()">
+        <fieldset class="plain form-grid">
+          <legend class="step-title">1. Contact details</legend>
+          <label class="field">Full name<input type="text" autocomplete="name" required></label>
+          <label class="field">Phone<input type="tel" autocomplete="tel" required></label>
+          <label class="field">Email<input type="email" autocomplete="email"></label>
+        </fieldset>
+        <fieldset class="plain stack gap-12">
+          <legend class="step-title">2. Delivery or pickup</legend>
+          <label class="option"><input type="radio" name="delivery" value="delivery" x-model="delivery"> Deliver to my address <span class="end">[DELIVERY FEE]</span></label>
+          <label class="option"><input type="radio" name="delivery" value="pickup" x-model="delivery"> Pick up from the shop <span class="end">Free</span></label>
+          <div class="form-grid" x-show="delivery === 'delivery'" style="margin-top: 6px">
+            <label class="field">City<input type="text" autocomplete="address-level2" :required="delivery === 'delivery'"></label>
+            <label class="field">Street and building<input type="text" autocomplete="street-address" :required="delivery === 'delivery'"></label>
+          </div>
+          <label class="field" style="margin-top: 6px">Notes for the shop (optional)<textarea rows="2" placeholder="e.g. cut bars to 3 m, call before delivery"></textarea></label>
+        </fieldset>
+        <fieldset class="plain stack gap-12">
+          <legend class="step-title">3. Payment</legend>
+          <label class="option"><input type="radio" name="payment" value="cod" x-model="payment"> Cash on delivery or pickup</label>
+          <label class="option"><input type="radio" name="payment" value="transfer" x-model="payment"> Bank transfer</label>
+          <label class="option disabled"><input type="radio" name="payment" disabled> Card payment (coming later)</label>
+        </fieldset>
+      </form>
+      <aside class="side-col summary">
+        <h2 class="h3">Your order</h2>
+        <template x-for="l in cartLines" :key="l.key">
+          <div class="sum-row small"><span x-text="l.qty + ' × ' + l.name"></span><strong style="white-space: nowrap" x-text="l.total"></strong></div>
+        </template>
+        <div class="sum-row saving" x-show="signedIn" style="border-top: 1px solid var(--line-strong); padding-top: 10px"><span>Wholesale discount</span><span x-text="'−' + money(savings)"></span></div>
+        <div class="sum-row small"><span class="label">Delivery</span><span x-text="delivery === 'pickup' ? 'Pickup (free)' : '[DELIVERY FEE]'"></span></div>
+        <div class="sum-row sum-total"><span>Total</span><strong x-text="money(total)"></strong></div>
+        <button type="submit" form="checkout-form" class="btn btn-primary btn-lg">Place order</button>
+        <button type="button" class="link-btn" style="min-height: 40px" @click="go('cart')">Back to cart</button>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ===== Order placed ===== -->
+  <div x-show="screen === 'done'">
+    <div class="card message-card">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#157F3D" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M7 12l3.5 3.5L17 9"/></svg>
+      <h1 class="h1" style="font-size: 28px" x-text="'Order ' + lastOrder + ' placed'"></h1>
+      <p>Thank you! We'll call you to confirm the details and the delivery or pickup time.</p>
+      <div class="row gap-12" style="justify-content: center; margin-top: 8px">
+        <button type="button" class="btn btn-primary" @click="go('orders')">View my orders</button>
+        <button type="button" class="btn btn-outline" @click="goHome()">Continue shopping</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== My orders ===== -->
+  <div x-show="screen === 'orders'">
+    <div class="section-head" style="margin-bottom: 20px">
+      <h1 class="h1">My orders</h1>
+      <button type="button" class="btn btn-danger" x-show="signedIn" @click="signOut()">Sign out</button>
+    </div>
+    <div class="banner" x-show="!signedIn">
+      <span>Sign in to see all your past orders and reorder quickly.</span>
+      <button type="button" class="btn btn-primary" @click="goSignin('login')">Sign in</button>
+    </div>
+    <div class="empty" x-show="orderList.length === 0">You haven't placed any orders yet.</div>
+    <div class="stack gap-12">
+      <template x-for="o in orderList" :key="o.num">
+        <div class="card list-card">
+          <div class="stack" style="flex: 1 1 160px"><span class="order-num" x-text="'Order ' + o.num"></span><span class="muted small" x-text="o.date"></span></div>
+          <span style="flex: 1 1 100px; color: var(--text-2)" x-text="o.items"></span>
+          <strong style="flex: 1 1 100px" x-text="o.total"></strong>
+          <span class="status" :class="o.status === 'Delivered' ? 'status-green' : 'status-blue'" x-text="o.status"></span>
+        </div>
+      </template>
+    </div>
+  </div>
+
+</main>
+
+<!-- ================= Footer ================= -->
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="stack gap-4">
+      <span class="footer-name">F.A.B CO LTD</span>
+      <span class="footer-meta">Aluminum Accessories and Profiles · [SHOP ADDRESS] · [PHONE]</span>
+    </div>
+    <div class="footer-links">
+      <button type="button" @click="go('orders')">My orders</button>
+      <button type="button" @click="goSignin('apply')">Wholesale accounts</button>
+      <a href="admin.html">Admin panel (demo) →</a>
+    </div>
+  </div>
+</footer>
+
+</div>
+</body>
+</html>
